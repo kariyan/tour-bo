@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty name="kafka" source="log.kafka-host"/>
+    <springProperty name="service" source="log.service-name"/>
+    <property name="LOGS_PATH" value="./logs"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%X{uid}][%thread] %-5level %logger{100}:%line - %msg%n</Pattern>
+        </encoder>
+    </appender>
+
+    <!-- kafkaAppender with Logstash -->
+    <appender name="logstashKafkaAppender" class="com.github.danielwegener.logback.kafka.KafkaAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"instanceId":"${pinpoint.agentId}"}</customFields>
+        </encoder>
+        <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy"/>
+        <topic>${service}</topic>
+        <producerConfig>bootstrap.servers=${kafka}</producerConfig>
+    </appender>
+
+    <appender name="asyncKafkaAppender" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="logstashKafkaAppender"/>
+    </appender>
+
+    <!-- TRACE > DEBUG > INFO > WARN > ERROR -->
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="asyncKafkaAppender"/>
+    </root>
+
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="reactor.ipc.netty.channel" level="INFO"/>
+    <logger name="io.lettuce" level="INFO"/>
+    <logger name="io.netty" level="INFO"/>
+    <logger name="reactor.netty" level="INFO"/>
+    <logger name="org.hibernate" level="INFO"/>
+    <logger name="org.mybatis" level="DEBUG"/>
+    <logger name="org.apache" level="ERROR"/>
+    <logger name="com.amazonaws" level="INFO"/>
+    <logger name="com.zaxxer.hikari" level="ERROR"/>
+    <logger name="com.wemakeprice.tour.bo" level="DEBUG"/>
+</configuration>

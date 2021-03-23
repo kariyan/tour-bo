@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty name="kafka" source="log.kafka-host"/>
+    <springProperty name="service" source="log.service-name"/>
+    <property name="LOGS_PATH" value="./logs"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%X{uid}][%thread] %-5level %logger{100}:%line - %msg%n</Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="logstashKafkaAppender" class="com.github.danielwegener.logback.kafka.KafkaAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <!-- fieldName이 중복될 경우, 제일 마지막에 있는 provider 기준으로 적용 -->
+                <!-- provider 선언순서에 주의 필요 -->
+                <logstashMarkers/>
+                <mdc/>
+                <pattern>
+                    <pattern>
+                        {
+                        "instanceId":"${pinpoint.agentId}",
+                        "timestamp": "%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}",
+                        "severity": "%level",
+                        "service": "${service}",
+                        "serverIp": "${java.rmi.server.hostname:-127.0.0.1}",
+                        "hostName": "${nd.hostname:-localhost}",
+                        "pid": "${PID:-}",
+                        "thread": "%t",
+                        "class": "%logger{100}",
+                        "stack_trace" : "%xException",
+                        "rest": "%msg"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+
+        <topic>wmp_api_log_json</topic>
+        <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.NoKeyKeyingStrategy"/>
+        <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy"/>
+        <producerConfig>acks=0</producerConfig>
+        <producerConfig>max.block.ms=0</producerConfig>
+
+        <producerConfig>bootstrap.servers=${kafka}</producerConfig>
+    </appender>
+
+    <appender name="asyncKafkaAppender" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="logstashKafkaAppender"/>
+    </appender>
+
+    <!-- TRACE > DEBUG > INFO > WARN > ERROR -->
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="asyncKafkaAppender"/>
+    </root>
+
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="reactor.ipc.netty.channel" level="INFO"/>
+    <logger name="io.lettuce" level="INFO"/>
+    <logger name="io.netty" level="INFO"/>
+    <logger name="reactor.netty" level="INFO"/>
+    <logger name="org.hibernate" level="INFO"/>
+    <logger name="org.mybatis" level="DEBUG"/>
+    <logger name="org.apache" level="ERROR"/>
+    <logger name="com.amazonaws" level="INFO"/>
+    <logger name="com.zaxxer.hikari" level="ERROR"/>
+    <logger name="com.wemakeprice.tour.bo" level="DEBUG"/>
+</configuration>

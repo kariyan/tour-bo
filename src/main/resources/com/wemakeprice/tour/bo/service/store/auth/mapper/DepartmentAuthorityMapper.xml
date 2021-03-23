@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wemakeprice.tour.bo.service.store.auth.mapper.DepartmentAuthorityMapper">
+
+    <resultMap id="AuthorityGroupMenuResultMap" type="com.wemakeprice.tour.bo.domain.entity.auth.DepartmentAuthority">
+        <id property="departmentCd" column="department_cd"/>
+        <association property="auditLog" javaType="com.wemakeprice.tour.bo.common.entity.AuditLog">
+            <result property="createdBy" column="created_by"/>
+            <result property="createdAt" column="created_at"/>
+        </association>
+    </resultMap>
+
+    <insert id="insertAll">
+        insert into tb_department_authority (
+        department_cd,
+        created_by,
+        created_at)
+        values
+        <foreach collection="departmentCds" item="departmentCd" separator=",">
+            (
+            #{departmentCd},
+            #{accountId},
+            now()
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectAll" resultMap="AuthorityGroupMenuResultMap">
+        select department_cd,
+               created_by,
+               created_at
+        from tb_department_authority
+    </select>
+
+    <delete id="deleteAllByDepartmentCds">
+        delete from tb_department_authority
+        where department_cd in
+        <foreach collection="departmentCds" item="departmentCd" open="(" separator="," close=")">
+            #{departmentCd}
+        </foreach>
+    </delete>
+
+</mapper>

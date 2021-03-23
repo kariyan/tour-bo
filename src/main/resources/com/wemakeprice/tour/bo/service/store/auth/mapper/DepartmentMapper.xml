@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wemakeprice.tour.bo.service.store.auth.mapper.DepartmentMapper">
+
+    <select id="selectAll" resultType="com.wemakeprice.tour.bo.domain.service.auth.dto.DepartmentDTO">
+        select department_cd,
+               parent_department_cd,
+               department_name,
+               department_level,
+               department_order
+        from department
+        where delete_flag = false
+    </select>
+
+</mapper>

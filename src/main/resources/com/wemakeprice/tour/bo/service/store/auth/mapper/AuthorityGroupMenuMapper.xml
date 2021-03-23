@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wemakeprice.tour.bo.service.store.auth.mapper.AuthorityGroupMenuMapper">
+
+    <resultMap id="AuthorityGroupMenuResultMap" type="com.wemakeprice.tour.bo.domain.entity.auth.AuthorityGroupMenu">
+        <id property="menuId" column="menu_id"/>
+        <result property="authorityGroupId" column="authority_group_id"/>
+        <result property="readFlag" column="read_flag"/>
+        <result property="writeFlag" column="write_flag"/>
+        <association property="auditLog" javaType="com.wemakeprice.tour.bo.common.entity.AuditLog">
+            <result property="createdBy" column="created_by"/>
+            <result property="createdAt" column="created_at"/>
+            <result property="updatedBy" column="updated_by"/>
+            <result property="updatedAt" column="updated_at"/>
+        </association>
+    </resultMap>
+
+    <insert id="insertAll" parameterType="map">
+        insert into tb_authority_group_menu (
+        menu_id,
+        authority_group_id,
+        read_flag,
+        write_flag,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at)
+        values
+        <foreach collection="authorityGroupMenus" item="authorityGroupMenu" separator=",">
+            (#{authorityGroupMenu.menuId},
+            #{authorityGroupMenu.authorityGroupId},
+            #{authorityGroupMenu.readFlag},
+            #{authorityGroupMenu.writeFlag},
+            #{authorityGroupMenu.auditLog.createdBy},
+            now(),
+            #{authorityGroupMenu.auditLog.createdBy},
+            now())
+        </foreach>
+    </insert>
+
+    <select id="selectByAuthorityGroupId" resultMap="AuthorityGroupMenuResultMap">
+        select menu_id,
+               authority_group_id,
+               read_flag,
+               write_flag,
+               delete_flag,
+               created_by,
+               created_at,
+               updated_by,
+               updated_at
+        from tb_authority_group_menu
+        where authority_group_id = #{authorityGroupId}
+    </select>
+
+    <delete id="deleteAllByAuthorityGroupIds">
+        delete
+        from tb_authority_group_menu
+        where authority_group_id in
+        <foreach collection="authorityGroupIds" item="authorityGroupId" open="(" separator="," close=")">
+            #{authorityGroupId}
+        </foreach>
+    </delete>
+
+</mapper>

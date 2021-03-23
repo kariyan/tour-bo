@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wemakeprice.tour.bo.service.store.auth.mapper.AuthorityGroupMapper">
+
+    <resultMap id="AuthorityGroupResultMap" type="com.wemakeprice.tour.bo.domain.entity.auth.AuthorityGroup">
+        <id property="id" column="authority_group_id"/>
+        <result property="name" column="authority_name"/>
+        <result property="authorityType" column="authority_type"/>
+        <result property="defaultMenuId" column="default_menu_id"/>
+        <association property="auditLog" javaType="com.wemakeprice.tour.bo.common.entity.AuditLog">
+            <result property="createdBy" column="created_by"/>
+            <result property="createdAt" column="created_at"/>
+            <result property="updatedBy" column="updated_by"/>
+            <result property="updatedAt" column="updated_at"/>
+        </association>
+    </resultMap>
+
+    <select id="selectAll" resultMap="AuthorityGroupResultMap">
+        select authority_group_id,
+               authority_name,
+               authority_type,
+               default_menu_id,
+               created_by,
+               created_at,
+               updated_by,
+               updated_at
+        from tb_authority_group
+        where delete_flag = false
+    </select>
+
+    <insert id="insert" parameterType="com.wemakeprice.tour.bo.domain.entity.auth.AuthorityGroup">
+        insert into tb_authority_group (authority_name,
+                                        authority_type,
+                                        default_menu_id,
+                                        created_by,
+                                        created_at,
+                                        updated_by,
+                                        updated_at)
+        values (#{name},
+                #{authorityType},
+                #{deleteFlag},
+                #{auditLog.createdBy},
+                now(),
+                #{auditLog.createdBy},
+                now())
+    </insert>
+</mapper>

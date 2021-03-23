@@ -1,0 +1,79 @@
+spring:
+  profiles:
+    active: pre
+
+  freemarker:
+    template-loader-path: classpath:/html.templates
+    suffix: .ftlh
+    charset: UTF-8
+
+---
+mybatis:
+  config-location: classpath:mybatis-config.xml
+
+kms:
+  secret-name: stg-tour-bo
+  encrypt-secret-name: prod-new_biz_privacy
+  redis-secret-name: stg-redis-idc-farm
+
+  idc:
+    end-point: https://***
+    token: Token ***
+
+wmp:
+  addresses:
+    office-ip: 0:0:0:0:0:0:0:1
+    cs-ip: 0.0.0.0
+
+database:
+  connection-timeout: 30000
+  maximum-pool-size: 5
+  min-idle: 1
+  driver-class-name: com.mysql.cj.jdbc.Driver
+
+  options: ?verifyServerCertificate=false&useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true&allowMultiQueries=true
+
+  tour-bo:
+    cluster-url: jdbc:mysql://0.0.0.0:3307/tour_bo_pre
+    reader-url: jdbc:mysql://0.0.0.0:3307/tour_bo_pre
+  wtour-deal:
+    cluster-url: jdbc:mysql://0.0.0.0:3307/wtour_deal_pre
+    reader-url: jdbc:mysql://0.0.0.0:3307/wtour_deal_pre
+  tour_main:
+    cluster-url: jdbc:mysql://0.0.0.0:3307/tour_main_pre
+    reader-url: jdbc:mysql://0.0.0.0:3307/tour_main_pre
+
+wonder:
+  jwt:
+    secret: WONDERTOUR
+
+redis:
+  cluster:
+    clusterHosts: 0.0.0.0:6379
+    pool:
+      minIdle: 50
+      maxIdle: 100
+      maxTotal: 150
+      jmxEnable: false
+      maxWaitMillis: -1
+      testOnBorrow: false
+      testOnReturn: false
+      testWhileIdle: true
+    commands:
+      timeoutMilliSeconds: 1000
+      setBaseExpireSeconds: 0
+  key:
+    prefix: "wmp-tour-bo:"
+
+aws:
+  s3:
+    region: ap-northeast-2
+    bucket: tourimg.live
+
+s3uploader:
+  cdn-url: https://***
+  file-name: tour-main/service-category-pre.json
+
+log:
+  kafka-host: 0.0.0.0:9092
+  service-name: tour-bo-pre

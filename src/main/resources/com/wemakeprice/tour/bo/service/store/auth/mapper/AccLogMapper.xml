@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wemakeprice.tour.bo.service.store.auth.mapper.AccLogMapper">
+    <insert id="insertAccLog" parameterType="com.wemakeprice.tour.bo.domain.entity.auth.AccLog" useGeneratedKeys="true">
+        insert into tb_acc_log
+        (log_ip,
+         http_method,
+         log_uri,
+         created_by,
+         created_at)
+        values (#{logIp},
+                #{requestType},
+                #{logUri},
+                #{auditLog.createdBy},
+                now())
+    </insert>
+</mapper>

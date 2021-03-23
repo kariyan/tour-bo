@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wemakeprice.tour.bo.service.store.auth.mapper.MenuMapper">
+
+    <resultMap id="menuResultMap" type="com.wemakeprice.tour.bo.domain.entity.auth.Menu">
+        <id property="menuId" column="menu_id"/>
+        <result property="parentMenuId" column="parent_menu_id"/>
+        <result property="menuLevel" column="menu_level"/>
+        <result property="sortNo" column="sort_no"/>
+        <result property="menuName" column="menu_name"/>
+        <result property="link" column="link"/>
+        <result property="useFlag" column="use_flag"/>
+        <result property="deleteFlag" column="delete_flag"/>
+        <association property="auditLog" javaType="com.wemakeprice.tour.bo.common.entity.AuditLog">
+            <result property="createdBy" column="created_by"/>
+            <result property="createdAt" column="created_at"/>
+            <result property="updatedBy" column="updated_by"/>
+            <result property="updatedAt" column="updated_at"/>
+        </association>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.wemakeprice.tour.bo.domain.entity.auth.Menu" useGeneratedKeys="true" keyProperty="menuId">
+        insert into tb_menu
+        (parent_menu_id,
+         menu_level,
+         menu_name,
+         sort_no,
+         link,
+         use_flag,
+         delete_flag,
+         created_by,
+         created_at,
+         updated_by,
+         updated_at)
+        values (#{parentMenuId},
+                #{menuLevel},
+                #{menuName},
+                #{sortNo},
+                #{link},
+                #{useFlag},
+                #{deleteFlag},
+                #{auditLog.createdBy},
+                now(),
+                #{auditLog.createdBy},
+                now())
+    </insert>
+
+    <select id="select" resultMap="menuResultMap" parameterType="long">
+        select menu_id,
+               parent_menu_id,
+               menu_level,
+               menu_name,
+               sort_no,
+               link,
+               use_flag,
+               delete_flag,
+               created_by,
+               created_at,
+               updated_by,
+               updated_at
+        from tb_menu
+        where menu_id = #{menuId}
+          and delete_flag = false
+    </select>
+
+    <select id="selectByCondition" resultMap="menuResultMap" parameterType="map">
+        select menu_id,
+        parent_menu_id,
+        menu_level,
+        menu_name,
+        sort_no,
+        link,
+        use_flag,
+        delete_flag,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at
+        from tb_menu
+        where delete_flag = false
+        <if test="condition.parentMenuId != null">
+            and parent_menu_id = #{condition.parentMenuId}
+        </if>
+        <if test="condition.menuName != null and condition.menuName != ''">
+            and menu_name = #{condition.menuName}
+        </if>
+        <if test="condition.useFlag != null">
+            and use_flag = #{condition.useFlag}
+        </if>
+        order by menu_level, sort_no
+    </select>
+
+    <sql id="selectMenu">
+        select menu_id,
+               parent_menu_id,
+               menu_level,
+               menu_name,
+               sort_no,
+               link,
+               use_flag,
+               delete_flag,
+               created_by,
+               created_at,
+               updated_by,
+               updated_at
+        from tb_menu
+    </sql>
+
+    <update id="update" parameterType="com.wemakeprice.tour.bo.domain.entity.auth.Menu">
+        update tb_menu
+        set parent_menu_id = #{parentMenuId},
+            menu_level     = #{menuLevel},
+            menu_name      = #{menuName},
+            sort_no        = #{sortNo},
+            link           = #{link},
+            use_flag       = #{useFlag},
+            delete_flag    = #{deleteFlag},
+            updated_by     = #{auditLog.updatedBy},
+            updated_at     = now()
+        where menu_id = #{menuId}
+    </update>
+
+    <update id="updateUseFlags" parameterType="map">
+        update tb_menu
+        set use_flag = #{useFlag},
+        updated_by = #{updater},
+        updated_at = now()
+        where menu_id in
+        <foreach collection="menuIds" item="menuId" open="(" separator="," close=")">
+            #{menuId}
+        </foreach>
+    </update>
+
+</mapper>

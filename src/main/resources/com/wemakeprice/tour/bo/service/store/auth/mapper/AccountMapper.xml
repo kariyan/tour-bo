@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wemakeprice.tour.bo.service.store.auth.mapper.AccountMapper">
+
+    <resultMap id="AccountResultMap" type="com.wemakeprice.tour.bo.domain.service.auth.dto.AccountDTO">
+        <id property="accountId" column="account_id"/>
+        <result property="accountName" column="account_name"/>
+        <result property="accountEmail" column="account_email"/>
+        <result property="phone" column="phone"/>
+        <result property="employmentCd" column="employment_cd"/>
+        <result property="positionCd" column="position_cd"/>
+        <result property="jobCd" column="job_cd"/>
+        <result property="departmentCd" column="department_cd"/>
+        <result property="departmentName" column="department_name"/>
+        <result property="accountStatus" column="account_status"/>
+        <result property="useFlag" column="use_flag"/>
+        <result property="passwdFailCnt" column="passwd_fail_cnt"/>
+        <association property="auditLog" javaType="com.wemakeprice.tour.bo.common.entity.AuditLog">
+            <result property="createdBy" column="creator"/>
+            <result property="createdAt" column="created"/>
+            <result property="updatedBy" column="updater"/>
+            <result property="updatedAt" column="updated"/>
+        </association>
+    </resultMap>
+
+    <select id="selectById" parameterType="string" resultMap="AccountResultMap">
+        select a.account_id,
+               a.account_name,
+               a.account_email,
+               a.phone,
+               a.employment_cd,
+               a.position_cd,
+               a.job_cd,
+               a.department_cd,
+               d.department_name,
+               if(a.account_status = 'TIMEOFF', 'LAYOFF', a.account_status) account_status,
+               a.use_flag,
+               a.passwd_fail_cnt,
+               a.created,
+               a.creator,
+               a.updated,
+               a.updater
+        from account a
+                 inner join department d on d.department_cd = a.department_cd
+        where account_id = #{accountId}
+    </select>
+
+    <select id="selectByCondition" parameterType="map" resultMap="AccountResultMap">
+        select a.account_id,
+        a.account_name,
+        a.account_email,
+        a.phone,
+        a.employment_cd,
+        a.position_cd,
+        a.job_cd,
+        a.department_cd,
+        d.department_name,
+        if (a.account_status = 'TIMEOFF', 'LAYOFF', a.account_status) account_status,
+        a.use_flag,
+        a.delete_flag,
+        a.passwd_fail_cnt,
+        a.created,
+        a.creator,
+        a.updated,
+        a.updater
+        from account a inner join department d on d.department_cd = a.department_cd
+        <include refid="selectByConditionWhereClause"/>
+        LIMIT #{pageable.offset}, #{pageable.pageSize}
+
+    </select>
+
+    <select id="countByCondition" parameterType="map" resultType="java.lang.Integer">
+        select count(*)
+        from account a inner join department d on d.department_cd = a.department_cd
+        <include refid="selectByConditionWhereClause"/>
+    </select>
+
+    <sql id="selectByConditionWhereClause">
+        where a.delete_flag = false
+        <if test="condition.id != null and condition.id != ''">
+            and a.account_id = #{condition.id}
+        </if>
+        <if test="condition.name != null and condition.name != ''">
+            and a.account_name = #{condition.name}
+        </if>
+        <if test="condition.useFlag != null">
+            and a.use_flag = #{condition.useFlag}
+        </if>
+    </sql>
+
+</mapper>
